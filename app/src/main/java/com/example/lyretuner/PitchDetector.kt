@@ -54,7 +54,9 @@ object PitchDetector {
         val minLag = ceil(sampleRate.toDouble() / MAX_FREQUENCY)
             .toInt()
             .coerceAtLeast(2)
-        val maxLag = (sampleRate / MIN_FREQUENCY).toInt().coerceAtMost(samples.size / 2)
+        val maxLag = ceil(sampleRate.toDouble() / MIN_FREQUENCY)
+            .toInt()
+            .coerceAtMost(samples.size / 2)
         if (maxLag <= minLag) return null
 
         val difference = workspace?.differenceBuffer(maxLag + 1) ?: DoubleArray(maxLag + 1)

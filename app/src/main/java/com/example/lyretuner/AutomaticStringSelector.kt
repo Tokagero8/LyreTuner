@@ -35,7 +35,9 @@ internal class AutomaticStringSelector(
         val current = selectedString
 
         if (current == null) {
-            selectedString = candidate.takeIf { candidateDistance <= acquisitionDistanceCents }
+            selectedString = candidate.takeIf {
+                candidateDistance.isWithin(acquisitionDistanceCents)
+            }
             outOfRangeReadingCount = 0
             return selectedString
         }
@@ -46,8 +48,9 @@ internal class AutomaticStringSelector(
             return selectedString
         }
 
-        val candidateIsClearlyBetter = candidateDistance <= acquisitionDistanceCents &&
-            currentDistance - candidateDistance >= switchAdvantageCents
+        val candidateIsClearlyBetter = candidateDistance.isWithin(acquisitionDistanceCents) &&
+            currentDistance - candidateDistance + CENTS_COMPARISON_EPSILON >=
+            switchAdvantageCents
         if (candidateIsClearlyBetter) {
             selectedString = candidate
             outOfRangeReadingCount = 0
@@ -64,7 +67,7 @@ internal class AutomaticStringSelector(
     }
 
     private fun updateReleaseState(currentDistanceCents: Double) {
-        if (currentDistanceCents <= releaseDistanceCents) {
+        if (currentDistanceCents.isWithin(releaseDistanceCents)) {
             outOfRangeReadingCount = 0
             return
         }
@@ -77,4 +80,11 @@ internal class AutomaticStringSelector(
 
     private fun distanceCents(frequencyHz: Double, string: LyreString): Double =
         abs(LyreTuning.centsBetween(frequencyHz, string.frequencyHz))
+
+    private fun Double.isWithin(limitCents: Double): Boolean =
+        this <= limitCents + CENTS_COMPARISON_EPSILON
+
+    private companion object {
+        const val CENTS_COMPARISON_EPSILON = 1e-9
+    }
 }
