@@ -1,16 +1,7 @@
-package com.example.lyretuner
+package com.example.lyretuner.tuning
 
 import kotlin.math.abs
 import kotlin.math.ln
-
-data class LyreString(
-    val midi: Int,
-    val note: String,
-    val octave: Int,
-    val frequencyHz: Double,
-) {
-    val name: String = "$note$octave"
-}
 
 object LyreTuning {
     /** The 24 diatonic strings from D3 through F6, with A4 = 440 Hz. */

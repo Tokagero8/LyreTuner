@@ -1,5 +1,6 @@
-package com.example.lyretuner
+package com.example.lyretuner.analysis
 
+import com.example.lyretuner.tuning.LyreTuning
 import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.ln

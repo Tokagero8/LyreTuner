@@ -1,4 +1,4 @@
-package com.example.lyretuner
+package com.example.lyretuner.tuning
 
 import kotlin.math.abs
 

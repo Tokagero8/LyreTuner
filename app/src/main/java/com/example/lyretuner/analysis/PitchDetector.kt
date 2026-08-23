@@ -1,12 +1,7 @@
-package com.example.lyretuner
+package com.example.lyretuner.analysis
 
 import kotlin.math.ceil
 import kotlin.math.sqrt
-
-data class PitchReading(
-    val frequencyHz: Double,
-    val periodicity: Double,
-)
 
 /** YIN pitch detection tuned for the D3–F6 range of this lyre. */
 object PitchDetector {
