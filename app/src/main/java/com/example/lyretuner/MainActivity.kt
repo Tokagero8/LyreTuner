@@ -1,47 +1,70 @@
 package com.example.lyretuner
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.core.content.ContextCompat
+import com.example.lyretuner.presentation.TunerViewModel
+import com.example.lyretuner.ui.tuner.TunerScreen
 import com.example.lyretuner.ui.theme.LyreTunerTheme
 
 class MainActivity : ComponentActivity() {
+    private val viewModel: TunerViewModel by viewModels()
+
+    private val microphonePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        viewModel.onMicrophonePermissionResult(granted)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            LyreTunerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            val uiState by viewModel.uiState.collectAsState()
+
+            LyreTunerTheme(dynamicColor = false) {
+                TunerScreen(
+                    state = uiState,
+                    onListeningClick = ::handleListeningClick,
+                    onStringClick = viewModel::toggleStringSelection,
+                    onAutoClick = viewModel::useAutomaticSelection,
+                )
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    private fun handleListeningClick() {
+        if (viewModel.uiState.value.isListening) {
+            viewModel.stopListening()
+            return
+        }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    LyreTunerTheme {
-        Greeting("Android")
+        val hasPermission = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.RECORD_AUDIO,
+        ) == PackageManager.PERMISSION_GRANTED
+
+        viewModel.startListening(hasPermission)
+        if (!hasPermission) {
+            microphonePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.enterForeground()
+    }
+
+    override fun onStop() {
+        viewModel.leaveForeground()
+        super.onStop()
     }
 }
