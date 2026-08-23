@@ -1,5 +1,6 @@
-package com.example.lyretuner
+package com.example.lyretuner.analysis
 
+import com.example.lyretuner.tuning.LyreTuning
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
